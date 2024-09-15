@@ -1,14 +1,18 @@
 package com.photomap.screen
 
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,6 +47,13 @@ fun ScreenCamera(
             }
         )
 
+        TextField(
+            value = formRegisterVM.formName.value,
+            onValueChange = { formRegisterVM.formName.value = it },
+            label = { Text("Nombre del lugar") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Button(
             modifier = Modifier
             .align(Alignment.BottomCenter)
@@ -53,15 +64,19 @@ fun ScreenCamera(
                     saveImage(context),
                     context
                 ) { uri ->
-                    formRegisterVM.photoList.value += uri
-                    appVM.currentScreenState = Screen.FORM
+
+                    if(formRegisterVM.formName.value.length > 0) {
+                        formRegisterVM.photoList.value += uri
+                        appVM.currentScreenState = Screen.FORM
+
+                        formRegisterVM.formName.value = ""
+                    } else {
+                        Toast.makeText(context, " ingresa un nombre para la ubicación", Toast.LENGTH_SHORT).show()
+                    }
+
                 }
             }) {
             Text(text = "Capturar Foto")
         }
     }
-
-
-
-
 }
