@@ -20,19 +20,40 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -51,7 +72,7 @@ class AppVM: ViewModel() {
 
 class FormRegisterVM: ViewModel() {
     val name = mutableStateOf("")
-    val photo = mutableStateOf<Uri?>(null)
+    val photos = mutableStateOf<List<Uri>>(emptyList())
 }
 
 class MainActivity : ComponentActivity() {
@@ -149,6 +170,7 @@ fun ScreenForm() {
     val context = LocalContext.current
     val appVm: AppVM = viewModel()
     val formRegisterVM: FormRegisterVM = viewModel()
+    var expandedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     Column() {
         Button(onClick = {
@@ -157,8 +179,44 @@ fun ScreenForm() {
             Text(text = "Tomar Foto")
         }
 
-        formRegisterVM.photo.value?.let {
-            Image(painter = BitmapPainter(uri2imageBitmap(it, context)), contentDescription = "Imagen capturada")
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 128.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            content = {
+                items(formRegisterVM.photos.value) { uri ->
+                    val bitmap = uri2imageBitmap(uri, context)
+                    Image(
+                        painter = BitmapPainter(bitmap),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .clickable {
+                                expandedImageUri = uri
+                            }
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        expandedImageUri?.let { uri ->
+            Dialog(onDismissRequest = { expandedImageUri = null }) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                ) {
+                    Image(
+                        painter = BitmapPainter(uri2imageBitmap(uri, context)),
+                        contentDescription = "Imagen ampliada",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .aspectRatio(4 / 5f) // Ajusta la relación de aspecto para vertical
+                            .clickable { expandedImageUri = null } // Oculta la imagen al hacer clic
+                            .padding(16.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -187,8 +245,8 @@ fun ScreenCamera(
             cameraController,
             saveImage(context),
             context
-        ) {
-            formRegisterVM.photo.value = it
+        ) { uri ->
+            formRegisterVM.photos.value += uri
             appVM.currentScreen = Screen.FORM
 
         }
