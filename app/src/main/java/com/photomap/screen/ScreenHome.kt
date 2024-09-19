@@ -16,13 +16,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.photomap.Location
 import com.photomap.Screen
 import com.photomap.components.FullScreenImageViewer
 import com.photomap.utils.uriToImageBitmap
@@ -39,7 +39,9 @@ fun ScreenHome() {
     val formRegisterVM: FormRegistrationViewModel = viewModel()
     
     Column {
-        Button(onClick = {
+        Button(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            onClick = {
             appVm.currentScreenState = Screen.CAMERA
         }) {
             Text(text = "Tomar Foto")
