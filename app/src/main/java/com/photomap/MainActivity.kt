@@ -1,5 +1,6 @@
 package com.photomap
 
+import android.location.Location
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,15 +17,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.photomap.screen.ScreenCamera
 import com.photomap.screen.ScreenHome
+import com.photomap.screen.ScreenMap
 import com.photomap.viewModel.AppViewModel
 
 enum class Screen {
     FORM,
-    CAMERA
+    CAMERA,
+    MAP
 }
 
 
@@ -37,7 +44,11 @@ class MainActivity : ComponentActivity() {
     val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) {
-        if(it[android.Manifest.permission.CAMERA]?:false) {
+        if(
+            (it[android.Manifest.permission.CAMERA]?:false) or
+            (it[android.Manifest.permission.ACCESS_FINE_LOCATION]?:false) or
+            (it[android.Manifest.permission.ACCESS_COARSE_LOCATION]?:false)
+            ) {
           camaraVM.onCameraPermissionGranted()
         }
     }
@@ -77,7 +88,9 @@ fun Main(
     when (appVM.currentScreenState) {
         Screen.FORM -> ScreenHome()
         Screen.CAMERA -> ScreenCamera(permissionLauncher, cameraController)
+        Screen.MAP -> ScreenMap()
     }
-
 }
+
+data class Location(val latitude: Double, val longitude: Double)
 

@@ -87,4 +87,10 @@ dependencies {
     // If you want to additionally use the CameraX Extensions library
     //implementation("androidx.camera:camera-extensions:${camerax_version}")
 
+    // Determina ubicación
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    //Open Street Map (osmdroid)
+    implementation("org.osmdroid:osmdroid-android:6.1.16")
+
 }

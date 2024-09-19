@@ -21,6 +21,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.photomap.Screen
 import com.photomap.utils.capturePhoto
+import com.photomap.utils.conseguirUbicaicon
 import com.photomap.utils.saveImage
 import com.photomap.viewModel.AppViewModel
 import com.photomap.viewModel.FormRegistrationViewModel
@@ -35,7 +36,13 @@ fun ScreenCamera(
     val formRegisterVM: FormRegistrationViewModel = viewModel()
     val appVM: AppViewModel = viewModel()
 
-    permissionLauncher.launch(arrayOf(android.Manifest.permission.CAMERA))
+    permissionLauncher.launch(
+        arrayOf(
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
@@ -68,6 +75,10 @@ fun ScreenCamera(
                     if(formRegisterVM.formName.value.length > 0) {
                         formRegisterVM.photoList.value += uri
                         appVM.currentScreenState = Screen.FORM
+                        conseguirUbicaicon(context) {
+                            formRegisterVM.latitude.doubleValue = it.latitude
+                            formRegisterVM.longitude.doubleValue = it.longitude
+                        }
 
                         formRegisterVM.formName.value = ""
                     } else {
